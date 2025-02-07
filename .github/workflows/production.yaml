@@ -79,9 +79,9 @@ jobs:
               --set-string appVersion=${{ github.sha }} \
               --set-string image.repository=${{ env.IMAGE }} \
               --set-string image.tag=${{ github.sha }} \
-              --set imagePullSecrets={${{ env.IMAGE_PULL_SECRET_NAME }}} \
-              --set-string ingress.hosts[0].host=${{ env.HOSTNAME }} \
-              --set-string ingress.tls[0].hosts=${{ env.HOSTNAME }} \
+              --set-json imagePullSecrets='[{"name": "${{ env.IMAGE_PULL_SECRET_NAME }}" }]' \
+              --set-json ingress.hosts='[{ "host": "${{ env.HOSTNAME }}", "paths": [{ "path": "/", "pathType": "ImplementationSpecific" }] }]' \
+              --set-json ingress.tls='[{ "secretName": "inex-prod-cert", "hosts": ["${{ env.HOSTNAME }}"]}]' \
               --set-string ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod \
               --set-string resources.requests.cpu=100m,resources.requests.memory=128Mi \
               --set-string resources.limits.cpu=150m,resources.limits.memory=192Mi
