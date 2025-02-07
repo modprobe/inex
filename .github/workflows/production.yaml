@@ -54,11 +54,6 @@ jobs:
     concurrency:
       group: deploy-production
       cancel-in-progress: false
-    env:
-      NAMESPACE: inex
-      HOSTNAME: inex.t8n.io
-      REPLICAS: "3"
-      IMAGE_PULL_SECRET_NAME: ghcr-pullsecret
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-kubectl@v4
@@ -74,15 +69,15 @@ jobs:
               --install \
               --wait \
               --atomic \
-              --namespace=${{ env.NAMESPACE }} \
+              --namespace=${{ vars.NAMESPACE }} \
               --create-namespace \
-              --set replicaCount=${{ env.REPLICAS }} \
+              --set replicaCount=${{ vars.REPLICAS }} \
               --set-string appVersion=${{ github.sha }} \
               --set-string image.repository=${{ env.IMAGE }} \
               --set-string image.tag=${{ github.sha }} \
-              --set-json imagePullSecrets='[{"name": "${{ env.IMAGE_PULL_SECRET_NAME }}" }]' \
-              --set-json ingress.hosts='[{ "host": "${{ env.HOSTNAME }}", "paths": [{ "path": "/", "pathType": "ImplementationSpecific" }] }]' \
-              --set-json ingress.tls='[{ "secretName": "inex-prod-cert", "hosts": ["${{ env.HOSTNAME }}"]}]' \
+              --set-json imagePullSecrets='[{"name": "${{ vars.IMAGE_PULL_SECRET_NAME }}" }]' \
+              --set-json ingress.hosts='[{ "host": "${{ vars.HOSTNAME }}", "paths": [{ "path": "/", "pathType": "ImplementationSpecific" }] }]' \
+              --set-json ingress.tls='[{ "secretName": "inex-prod-cert", "hosts": ["${{ vars.HOSTNAME }}"]}]' \
               --set-string ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod \
               --set-string resources.requests.cpu=100m,resources.requests.memory=128Mi \
               --set-string resources.limits.cpu=150m,resources.limits.memory=192Mi
