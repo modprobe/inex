@@ -47,6 +47,7 @@ export const fetchVideoInfo = async (
   });
 
   const responseData: DataResponse = await response.json();
+  console.log("response: ", { responseData });
 
   return responseData.data?.xdt_shortcode_media;
 };
