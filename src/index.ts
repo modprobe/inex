@@ -6,17 +6,24 @@ const app = express();
 app.get("/p/:shortcode", async (req, res) => {
   const { shortcode } = req.params;
 
-  const videoUrl =
-    (await fetchEmbed(shortcode)) ??
-    (await fetchVideo(shortcode)) ??
-    (await fetchVideoAlt(shortcode));
+  const fail = () => res.status(404).send("can't handle this content :(");
 
-  if (!videoUrl) {
-    res.status(404).send("inex can only handle video content.");
-    return;
+  try {
+    const videoUrl = await Promise.any([
+      fetchVideo(shortcode),
+      fetchVideoAlt(shortcode),
+      fetchEmbed(shortcode),
+    ]);
+
+    if (!videoUrl) {
+      fail();
+      return;
+    }
+
+    res.redirect(videoUrl);
+  } catch {
+    fail();
   }
-
-  res.redirect(videoUrl);
 });
 
 app.get("/health", (_, res) => {
