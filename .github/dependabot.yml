@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories:
+      - "/"
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directories:
+      - "/"
+    schedule:
+      interval: daily
