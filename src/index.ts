@@ -1,21 +1,22 @@
 import express from "express";
-import { fetchAlternateVideoInfo, fetchVideoInfo } from "./service";
+import { fetchVideoAlt, fetchVideo, fetchEmbed } from "./service";
 
 const app = express();
 
 app.get("/p/:shortcode", async (req, res) => {
   const { shortcode } = req.params;
 
-  const videoInfo =
-    (await fetchVideoInfo(shortcode)) ??
-    (await fetchAlternateVideoInfo(shortcode));
+  const videoUrl =
+    (await fetchEmbed(shortcode)) ??
+    (await fetchVideo(shortcode)) ??
+    (await fetchVideoAlt(shortcode));
 
-  if (!videoInfo) {
+  if (!videoUrl) {
     res.status(404).send("inex can only handle video content.");
     return;
   }
 
-  res.redirect(videoInfo.video_url);
+  res.redirect(videoUrl);
 });
 
 app.get("/health", (_, res) => {

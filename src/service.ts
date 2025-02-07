@@ -9,10 +9,7 @@ const API_HEADERS = {
 };
 
 type MediaData = {
-  id: string;
   shortcode: string;
-  thumbnail_src: string;
-  display_url: string;
   video_url: string;
 };
 
@@ -28,9 +25,9 @@ type AlternateResponse = {
   };
 };
 
-export const fetchVideoInfo = async (
+export const fetchVideo = async (
   shortcode: string,
-): Promise<MediaData | undefined> => {
+): Promise<string | undefined> => {
   const variables = {
     shortcode: shortcode,
     child_comment_count: "3",
@@ -52,15 +49,15 @@ export const fetchVideoInfo = async (
     },
   });
 
-  const responseData: DataResponse = await response.json();
+  const responseData = <DataResponse>await response.json();
   console.log("response: ", { responseData });
 
-  return responseData.data?.xdt_shortcode_media;
+  return responseData.data?.xdt_shortcode_media?.video_url;
 };
 
-export const fetchAlternateVideoInfo = async (
+export const fetchVideoAlt = async (
   shortcode: string,
-): Promise<MediaData | undefined> => {
+): Promise<string | undefined> => {
   const url = `https://www.instagram.com/p/${shortcode}?__a=1&__d=dis`;
   const response = await fetch(url, {
     headers: {
@@ -70,11 +67,31 @@ export const fetchAlternateVideoInfo = async (
   });
 
   try {
-    const responseData: AlternateResponse = await response.json();
+    const responseData = <AlternateResponse>await response.json();
     console.log("response: ", { responseData });
 
-    return responseData.graphql?.shortcode_media;
+    return responseData.graphql?.shortcode_media?.video_url;
   } catch {
     console.log(await response.text());
   }
+};
+
+export const fetchEmbed = async (
+  shortcode: string,
+): Promise<string | undefined> => {
+  const url = `https://www.instagram.com/p/${shortcode}/embed/`;
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    },
+  });
+
+  const body = await response.text();
+
+  const VIDEO_URL_REGEX = /\\"video_url\\":\\"(?<url>.+)\\"/;
+  const video_url = body.match(VIDEO_URL_REGEX)?.groups?.url;
+
+  return video_url?.replaceAll("\\", "");
 };
