@@ -1,14 +1,16 @@
 import express from "express";
-import { fetchVideoInfo } from "./service";
+import { fetchAlternateVideoInfo, fetchVideoInfo } from "./service";
 
 const app = express();
 
 app.get("/p/:shortcode", async (req, res) => {
   const { shortcode } = req.params;
 
-  const videoInfo = await fetchVideoInfo(shortcode);
+  const videoInfo =
+    (await fetchVideoInfo(shortcode)) ??
+    (await fetchAlternateVideoInfo(shortcode));
+
   if (!videoInfo) {
-    console.log("got video info: ", { videoInfo });
     res.status(404).send("inex can only handle video content.");
     return;
   }

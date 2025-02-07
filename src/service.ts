@@ -22,6 +22,12 @@ type DataResponse = {
   };
 };
 
+type AlternateResponse = {
+  graphql: {
+    shortcode_media?: MediaData;
+  };
+};
+
 export const fetchVideoInfo = async (
   shortcode: string,
 ): Promise<MediaData | undefined> => {
@@ -50,4 +56,25 @@ export const fetchVideoInfo = async (
   console.log("response: ", { responseData });
 
   return responseData.data?.xdt_shortcode_media;
+};
+
+export const fetchAlternateVideoInfo = async (
+  shortcode: string,
+): Promise<MediaData | undefined> => {
+  const url = `https://www.instagram.com/p/${shortcode}?__a=1&__d=dis`;
+  const response = await fetch(url, {
+    headers: {
+      ...API_HEADERS,
+      Referrer: `https://www.instagram.com/p/${shortcode}`,
+    },
+  });
+
+  try {
+    const responseData: AlternateResponse = await response.json();
+    console.log("response: ", { responseData });
+
+    return responseData.graphql?.shortcode_media;
+  } catch {
+    console.log(await response.text());
+  }
 };
