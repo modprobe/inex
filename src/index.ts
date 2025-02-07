@@ -1,5 +1,5 @@
 import express from "express";
-import { fetchVideoAlt, fetchVideo, fetchEmbed } from "./service";
+import * as extractor from "./extract";
 
 const app = express();
 
@@ -10,9 +10,9 @@ app.get(["/p/:shortcode", "/reel/:shortcode"], async (req, res) => {
 
   try {
     const videoUrl = await Promise.any([
-      fetchVideo(shortcode),
-      fetchVideoAlt(shortcode),
-      fetchEmbed(shortcode),
+      extractor.graphqlQuery(shortcode),
+      extractor.debugOutput(shortcode),
+      extractor.embed(shortcode),
     ]);
 
     if (!videoUrl) {
