@@ -3,7 +3,7 @@ import * as extractor from "./extract";
 
 const app = express();
 
-app.get(["/p/:shortcode", "/reel/:shortcode"], async (req, res) => {
+app.get(/\/(p|reel)\/(?<shortcode>[A-Za-z0-9_-]{11})/, async (req, res) => {
   const { shortcode } = req.params;
 
   const fail = () => res.status(404).send("can't handle this content :(");
