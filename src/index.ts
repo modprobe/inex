@@ -31,4 +31,4 @@ app.get("/health", (_, res) => {
   res.send({ ok: true });
 });
 
-app.listen(3000, console.error);
+app.listen(process.env.PORT ?? 3000, console.error);
