@@ -18,11 +18,13 @@ type MediaData = {
 
 type DataResponse = {
   data: {
-    xdt_shortcode_media: MediaData;
+    xdt_shortcode_media?: MediaData;
   };
 };
 
-export const fetchVideoInfo = async (shortcode: string): Promise<MediaData> => {
+export const fetchVideoInfo = async (
+  shortcode: string,
+): Promise<MediaData | undefined> => {
   const variables = {
     shortcode: shortcode,
     child_comment_count: "3",
@@ -46,5 +48,5 @@ export const fetchVideoInfo = async (shortcode: string): Promise<MediaData> => {
 
   const responseData: DataResponse = await response.json();
 
-  return responseData.data.xdt_shortcode_media;
+  return responseData.data?.xdt_shortcode_media;
 };

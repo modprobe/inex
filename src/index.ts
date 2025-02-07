@@ -7,9 +7,9 @@ app.get("/p/:shortcode", async (req, res) => {
   const { shortcode } = req.params;
 
   const videoInfo = await fetchVideoInfo(shortcode);
-  if (!videoInfo.video_url) {
-    res.status(404);
-    res.send("inex can only handle video content.");
+  if (!videoInfo) {
+    res.status(404).send("inex can only handle video content.");
+    return;
   }
 
   res.redirect(videoInfo.video_url);
