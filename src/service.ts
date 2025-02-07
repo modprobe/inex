@@ -71,9 +71,10 @@ export const fetchVideoAlt = async (
     },
   });
 
+  const responseBody = await response.text();
+
   try {
-    const responseData = <AlternateResponse>await response.json();
-    console.log("response: ", { responseData });
+    const responseData = <AlternateResponse>JSON.parse(responseBody);
 
     if (!responseData.graphql || !responseData.graphql.shortcode_media) {
       throw new Error(
@@ -83,7 +84,7 @@ export const fetchVideoAlt = async (
 
     return responseData.graphql?.shortcode_media?.video_url;
   } catch {
-    console.log(await response.text());
+    throw new Error(`couldn't decode response body. body: ${responseBody}`);
   }
 };
 
@@ -125,7 +126,7 @@ export const fetchEmbed = async (
   const videoUrl = body.match(VIDEO_URL_REGEX)?.groups?.url;
 
   if (!videoUrl) {
-    throw new Error("couldn't fetch video URL");
+    throw new Error(`couldn't fetch video URL. response: ${body}`);
   }
 
   return videoUrl.replaceAll("\\u0025", "%").replaceAll("\\", "");

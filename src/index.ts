@@ -21,7 +21,8 @@ app.get(["/p/:shortcode", "/reel/:shortcode"], async (req, res) => {
     }
 
     res.redirect(videoUrl);
-  } catch {
+  } catch (e) {
+    console.log({ e });
     fail();
   }
 });
