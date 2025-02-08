@@ -29,6 +29,16 @@ spec:
           env:
             - name: PORT
               value: "3000"
+            {{- if .Values.appVersion }}
+            - name: APP_VERSION
+              value: {{ .Values.appVersion | quote }}
+            {{- end }}
+            {{- if .Values.telemetry.enabled }}
+            {{- range $k, $v := .Values.telemetry.envVars }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+            {{- end }}
           {{- if .Values.livenessProbe }}
           livenessProbe:
             httpGet:

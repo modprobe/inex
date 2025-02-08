@@ -25,4 +25,4 @@ WORKDIR /app
 COPY --from=deps /app /app/
 
 EXPOSE 3000
-CMD ["node", "/app/index.js"]
+CMD ["node", "--require", "/app/instrumentation.js", "/app/index.js"]

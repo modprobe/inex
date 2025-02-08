@@ -80,5 +80,13 @@ jobs:
               --set-json ingress.tls='[{ "secretName": "inex-prod-cert", "hosts": ["${{ vars.HOSTNAME }}"]}]' \
               --set-string ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod \
               --set-string resources.requests.cpu=100m,resources.requests.memory=128Mi \
-              --set-string resources.limits.cpu=150m,resources.limits.memory=192Mi
+              --set-string resources.limits.cpu=150m,resources.limits.memory=192Mi \
+              --set telemetry.enabled=true \
+              --set-string telemetry.envVars.OTEL_METRICS_EXPORTER=prometheus \
+              --set-string telemetry.envVars.OTEL_EXPORTER_PROMETHEUS_HOST="0.0.0.0" \
+              --set-string telemetry.envVars.OTEL_TRACES_EXPORTER=otlp \
+              --set-string telemetry.envVars.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="${{ vars.ALLOY_OTLP_ENDPOINT }}/v1/traces" \
+              --set-string telemetry.envVars.OTEL_LOGS_EXPORTER=otlp \
+              --set-string telemetry.envVars.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="${{ vars.ALLOY_OTLP_ENDPOINT }}/v1/logs" \
+              --set-string telemetry.envVars.OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
             
