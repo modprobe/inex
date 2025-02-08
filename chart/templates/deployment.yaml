@@ -26,6 +26,11 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
+            {{- if (and .Values.telemetry.enabled .Values.telemetry.envVars.OTEL_METRICS_EXPORTER (eq .Values.telemetry.envVars.OTEL_METRICS_EXPORTER "prometheus")) }}
+            - name: metrics
+              containerPort: {{ int (default "9464" .Values.telemetry.envVars.OTEL_EXPORTER_PROMETHEUS_PORT) }}
+              protocol: TCP
+            {{- end }}
           env:
             - name: PORT
               value: "3000"

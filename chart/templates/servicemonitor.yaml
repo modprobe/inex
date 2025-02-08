@@ -1,0 +1,22 @@
+{{- $telemetryEnabled := .Values.telemetry.enabled -}}
+{{- $prometheusExporterUsed := (and .Values.telemetry.envVars.OTEL_METRICS_EXPORTER (eq .Values.telemetry.envVars.OTEL_METRICS_EXPORTER "prometheus")) -}}
+{{- if (and $telemetryEnabled $prometheusExporterUsed) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+
+metadata: 
+  name: {{ include "inex.fullname" . }}-api
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "inex.labels" . | nindent 4 }}
+
+spec:
+  selector:
+    matchLabels:
+      {{- include "inex.selectorLabels" . | nindent 6 }}
+  namespaceSelector: 
+    matchNames: 
+      - {{ .Release.Namespace }}
+  endpoints:
+    - interval: 30s
+      targetPort: metrics
+{{- end -}}

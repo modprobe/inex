@@ -10,4 +10,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- $telemetryEnabled := .Values.telemetry.enabled -}}
+    {{- $prometheusExporterUsed := (and .Values.telemetry.envVars.OTEL_METRICS_EXPORTER (eq .Values.telemetry.envVars.OTEL_METRICS_EXPORTER "prometheus")) -}}
+    {{- if (and $telemetryEnabled $prometheusExporterUsed) }}
+    - port: {{ int (default "9464" .Values.telemetry.envVars.OTEL_EXPORTER_PROMETHEUS_PORT) }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+    {{- end }}
   selector: {{- include "inex.selectorLabels" . | nindent 4 }}
