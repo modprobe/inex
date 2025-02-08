@@ -33,9 +33,11 @@ app.get(/\/(p|reel)\/(?<shortcode>[A-Za-z0-9_-]{11})/, async (req, res) => {
     extractionCounter.add(1, { success: true });
     res.redirect(videoUrl);
   } catch (e) {
-    logger.error(`failed extraction: ${JSON.stringify(e)}`, {
+    const message = e instanceof Error ? e.message : JSON.stringify(e);
+
+    logger.error(`failed extraction: ${message}`, {
       shortcode,
-      error: JSON.stringify(e),
+      error: e,
     });
     fail();
   }
@@ -45,7 +47,6 @@ app.get("/health", (_, res) => {
   res.send({ ok: true });
 });
 
-app.listen(
-  process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
-  (err) => logger.error(err?.message),
+app.listen(process.env.PORT ? Number.parseInt(process.env.PORT) : 3000, (err) =>
+  logger.error(err?.message),
 );
