@@ -2,6 +2,7 @@ import express from "express";
 import { metrics } from "@opentelemetry/api";
 import * as extractor from "./extract";
 import { logger } from "./logger";
+import { inspect } from "node:util";
 
 const app = express();
 const meter = metrics.getMeter("inex", process.env?.APP_VERSION);
@@ -33,12 +34,22 @@ app.get(/\/(p|reel)\/(?<shortcode>[A-Za-z0-9_-]{11})/, async (req, res) => {
     extractionCounter.add(1, { success: true });
     res.redirect(videoUrl);
   } catch (e) {
-    const message = e instanceof Error ? e.message : JSON.stringify(e);
+    if (e instanceof AggregateError) {
+      logger.error(`failed extraction: ${e.message}`, {
+        shortcode,
+        errors: JSON.stringify(
+          e.errors.map(({ name, message }) => ({
+            name,
+            message,
+          })),
+        ),
+      });
+    } else if (e instanceof Error) {
+      logger.error(`failed extraction: ${e.message}`, {
+        shortcode,
+      });
+    }
 
-    logger.error(`failed extraction: ${message}`, {
-      shortcode,
-      error: e,
-    });
     fail();
   }
 });

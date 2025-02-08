@@ -34,6 +34,10 @@ const extract: Extractor = async (shortcode) => {
 
   const body = await response.text();
 
+  if (body.includes("EmbedIsBroken")) {
+    throw new Error("Embed is unavailable for this video");
+  }
+
   const VIDEO_URL_REGEX = /\\"video_url\\":\\"(?<url>[^"]+)\\"/;
   const videoUrl = body.match(VIDEO_URL_REGEX)?.groups?.url;
 
