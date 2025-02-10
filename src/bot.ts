@@ -48,15 +48,18 @@ bot.on(message("text"), async (ctx) => {
     );
   }
 
-  if (infos.length === 0) {
-    return;
+  for (const info of infos) {
+    const videoMetadata = await extract(info.shortcode, "bot");
+    if (!videoMetadata) {
+      continue;
+    }
+
+    await ctx.sendVideo(videoMetadata.videoUrl, {
+      caption:
+        videoMetadata.caption ??
+        `📹 Video by @${videoMetadata.username}\n${buildUrl(info.shortcode, info.prefix)}`,
+    });
   }
-
-  const reply = infos
-    .map((i) => `📹 ${buildUrl(i.shortcode, i.prefix)}`)
-    .join("\n");
-
-  await ctx.reply(reply);
 });
 
 bot.on("inline_query", async (ctx) => {
