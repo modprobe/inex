@@ -18,3 +18,5 @@ data:
   {{- if (and .Values.telemetry.enabled .Values.telemetry.envVars) }}
   {{ .Values.telemetry.envVars | toYaml | nindent 2 }}
   {{- end }}
+
+  DEBUG: "telegraf:*"
