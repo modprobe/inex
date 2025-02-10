@@ -28,6 +28,23 @@ const HEADERS = {
 const parameterRegex = (parameter: string): RegExp =>
   new RegExp(`\\\\"${parameter}\\\\":\\\\"(?<value>[^"]+)\\\\"`);
 
+const detectEscapeLevel = (input: string): number => {
+  const matches = [...input.matchAll(/\\+/g)];
+  const lengths = matches.map((m) => m[0].length);
+
+  return Math.max(...lengths);
+};
+
+const jsonUnescape = (input: string, level?: number): string => {
+  if (!level) {
+    level = detectEscapeLevel(input);
+  }
+
+  return level > 0
+    ? [...new Array(level)].reduce((acc) => JSON.parse(`"${acc}"`), input)
+    : input;
+};
+
 const extractParameter = (
   embed: string,
   parameter: string,
@@ -37,7 +54,7 @@ const extractParameter = (
 
   if (!extractedValue) return undefined;
 
-  return JSON.parse(`"${extractedValue}"`).replaceAll("\\", "");
+  return jsonUnescape(extractedValue);
 };
 
 const extractRequiredParameter = (embed: string, parameter: string): string => {

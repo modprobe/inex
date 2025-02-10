@@ -55,9 +55,7 @@ bot.on(message("text"), async (ctx) => {
     }
 
     await ctx.sendVideo(videoMetadata.videoUrl, {
-      caption:
-        videoMetadata.caption ??
-        `📹 Video by @${videoMetadata.username}\n${buildUrl(info.shortcode, info.prefix)}`,
+      caption: `📹 Video by @${videoMetadata.username}\n${videoMetadata.caption ? `📝 ${videoMetadata.caption}\n` : ""}🔗 ${buildUrl(info.shortcode, info.prefix)}`,
     });
   }
 });
