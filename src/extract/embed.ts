@@ -26,7 +26,7 @@ const HEADERS = {
 };
 
 const parameterRegex = (parameter: string): RegExp =>
-  new RegExp(`\\"${parameter}\\":\\"(?<value>[^"]+)\\"`);
+  new RegExp(`\\\\"${parameter}\\\\":\\\\"(?<value>[^"]+)\\\\"`);
 
 const extractParameter = (
   embed: string,
@@ -37,7 +37,7 @@ const extractParameter = (
 
   if (!extractedValue) return undefined;
 
-  return extractedValue.replaceAll("\\u0025", "%").replaceAll("\\", "");
+  return JSON.parse(`"${extractedValue}"`).replaceAll("\\", "");
 };
 
 const extractRequiredParameter = (embed: string, parameter: string): string => {
