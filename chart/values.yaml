@@ -1,4 +1,9 @@
-appVersion: ""
+app:
+  version: ""
+  host: "inex.example.com"
+  bot:
+    path: "/bot"
+    token: ""
 
 telemetry:
   enabled: true

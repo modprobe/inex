@@ -12,7 +12,10 @@ const API_HEADERS = {
 
 type MediaData = {
   shortcode: string;
+  username: string;
+  caption?: string;
   video_url: string;
+  thumbnail_src: string;
 };
 
 type DataResponse = {
@@ -51,7 +54,12 @@ const extract: Extractor = async (shortcode) => {
     );
   }
 
-  return responseData.data?.xdt_shortcode_media?.video_url;
+  return {
+    username: responseData.data.xdt_shortcode_media.username,
+    videoUrl: responseData.data.xdt_shortcode_media.video_url,
+    caption: responseData.data.xdt_shortcode_media.username,
+    thumbnailUrl: responseData.data.xdt_shortcode_media.thumbnail_src,
+  };
 };
 
 export default extract;

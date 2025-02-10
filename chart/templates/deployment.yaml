@@ -31,19 +31,11 @@ spec:
               containerPort: {{ int (default "9464" .Values.telemetry.envVars.OTEL_EXPORTER_PROMETHEUS_PORT) }}
               protocol: TCP
             {{- end }}
-          env:
-            - name: PORT
-              value: "3000"
-            {{- if .Values.appVersion }}
-            - name: APP_VERSION
-              value: {{ .Values.appVersion | quote }}
-            {{- end }}
-            {{- if .Values.telemetry.enabled }}
-            {{- range $k, $v := .Values.telemetry.envVars }}
-            - name: {{ $k }}
-              value: {{ $v | quote }}
-            {{- end }}
-            {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "inex.fullname" . }}-secrets
+            - configMapRef:
+                name: {{ include "inex.fullname" . }}-config
           {{- if .Values.livenessProbe }}
           livenessProbe:
             httpGet:

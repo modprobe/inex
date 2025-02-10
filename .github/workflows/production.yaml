@@ -72,7 +72,10 @@ jobs:
               --namespace=${{ vars.NAMESPACE }} \
               --create-namespace \
               --set replicaCount=${{ vars.REPLICAS }} \
-              --set-string appVersion=${{ github.sha }} \
+              --set-string app.version=${{ github.sha }} \
+              --set-string app.host=${{ vars.HOSTNAME }} \
+              --set-string app.bot.path=${{ vars.BOT_PATH }} \
+              --set-string app.bot.token=${{ secrets.BOT_TOKEN }} \
               --set-string image.repository=${{ env.IMAGE }} \
               --set-string image.tag=${{ github.sha }} \
               --set-json imagePullSecrets='[{"name": "${{ vars.IMAGE_PULL_SECRET_NAME }}" }]' \

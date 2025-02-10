@@ -1,63 +1,59 @@
 import express from "express";
-import { metrics } from "@opentelemetry/api";
-import * as extractor from "./extract";
+import { extract } from "./extract";
 import { logger } from "./logger";
-import { inspect } from "node:util";
+import { bot } from "./bot";
+import { requireEnv } from "./utils";
 
-const app = express();
-const meter = metrics.getMeter("inex", process.env?.APP_VERSION);
+(async () => {
+  const app = express();
 
-const extractionCounter = meter.createCounter<{ success: boolean }>(
-  "inex_instagram_extractions",
-);
+  app.get(/\/(p|reel)\/(?<shortcode>[A-Za-z0-9_-]{11})/, async (req, res) => {
+    const { shortcode } = req.params;
 
-app.get(/\/(p|reel)\/(?<shortcode>[A-Za-z0-9_-]{11})/, async (req, res) => {
-  const { shortcode } = req.params;
+    const fail = () => {
+      res.status(404).send("can't handle this content :(");
+    };
 
-  const fail = () => {
-    extractionCounter.add(1, { success: false });
-    res.status(404).send("can't handle this content :(");
-  };
+    try {
+      const metadata = await extract(shortcode, "web");
 
-  try {
-    const videoUrl = await Promise.any([
-      extractor.graphqlQuery(shortcode),
-      extractor.debugOutput(shortcode),
-      extractor.embed(shortcode),
-    ]);
+      if (!metadata) {
+        fail();
+        return;
+      }
 
-    if (!videoUrl) {
+      res.redirect(metadata.videoUrl);
+    } catch (e) {
+      if (e instanceof AggregateError) {
+        logger.error(`failed extraction: ${e.message}`, {
+          shortcode,
+          errors: JSON.stringify(
+            e.errors.map(({ name, message }) => ({
+              name,
+              message,
+            })),
+          ),
+        });
+      } else if (e instanceof Error) {
+        logger.error(`failed extraction: ${e.message}`, {
+          shortcode,
+        });
+      }
+
       fail();
-      return;
     }
+  });
 
-    extractionCounter.add(1, { success: true });
-    res.redirect(videoUrl);
-  } catch (e) {
-    if (e instanceof AggregateError) {
-      logger.error(`failed extraction: ${e.message}`, {
-        shortcode,
-        errors: JSON.stringify(
-          e.errors.map(({ name, message }) => ({
-            name,
-            message,
-          })),
-        ),
-      });
-    } else if (e instanceof Error) {
-      logger.error(`failed extraction: ${e.message}`, {
-        shortcode,
-      });
-    }
+  app.get("/health", (_, res) => {
+    res.send({ ok: true });
+  });
 
-    fail();
-  }
-});
+  const APP_HOST = requireEnv("APP_HOST");
+  const APP_BOT_PATH = requireEnv("APP_BOT_PATH");
+  app.use(await bot.createWebhook({ domain: APP_HOST, path: APP_BOT_PATH }));
 
-app.get("/health", (_, res) => {
-  res.send({ ok: true });
-});
-
-app.listen(process.env.PORT ? Number.parseInt(process.env.PORT) : 3000, (err) =>
-  logger.error(err?.message),
-);
+  app.listen(
+    process.env.APP_PORT ? Number.parseInt(process.env.APP_PORT) : 3000,
+    (err) => logger.error(err?.message),
+  );
+})();

@@ -31,8 +31,8 @@ Common labels
 {{- define "inex.labels" -}}
 helm.sh/chart: {{ include "inex.chart" . }}
 {{ include "inex.selectorLabels" . }}
-{{- if .Values.appVersion }}
-app.kubernetes.io/version: {{ .Values.appVersion | quote }}
+{{- if .Values.app.version }}
+app.kubernetes.io/version: {{ .Values.app.version | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}

@@ -13,6 +13,9 @@ const API_HEADERS = {
 type MediaData = {
   shortcode: string;
   video_url: string;
+  username: string;
+  caption?: string;
+  thumbnail_src: string;
 };
 
 type AlternateResponse = {
@@ -41,7 +44,12 @@ const extract: Extractor = async (shortcode) => {
       );
     }
 
-    return responseData.graphql?.shortcode_media?.video_url;
+    return {
+      videoUrl: responseData.graphql.shortcode_media.video_url,
+      thumbnailUrl: responseData.graphql.shortcode_media.thumbnail_src,
+      username: responseData.graphql.shortcode_media.username,
+      caption: responseData.graphql.shortcode_media.caption,
+    };
   } catch {
     throw new Error(`couldn't decode response body. body: ${responseBody}`);
   }

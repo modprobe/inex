@@ -25,6 +25,30 @@ const HEADERS = {
   "viewport-width": "1501",
 };
 
+const parameterRegex = (parameter: string): RegExp =>
+  new RegExp(`\\"${parameter}\\":\\"(?<value>[^"]+)\\"`);
+
+const extractParameter = (
+  embed: string,
+  parameter: string,
+): string | undefined => {
+  const regex = parameterRegex(parameter);
+  const extractedValue = embed.match(regex)?.groups?.value;
+
+  if (!extractedValue) return undefined;
+
+  return extractedValue.replaceAll("\\u0025", "%").replaceAll("\\", "");
+};
+
+const extractRequiredParameter = (embed: string, parameter: string): string => {
+  const value = extractParameter(embed, parameter);
+  if (!value) {
+    throw new Error(`couldn't extract ${parameter}. response: ${embed}`);
+  }
+
+  return value;
+};
+
 const extract: Extractor = async (shortcode) => {
   const url = `https://www.instagram.com/p/${shortcode}/embed/`;
 
@@ -38,14 +62,12 @@ const extract: Extractor = async (shortcode) => {
     throw new Error("Embed is unavailable for this video");
   }
 
-  const VIDEO_URL_REGEX = /\\"video_url\\":\\"(?<url>[^"]+)\\"/;
-  const videoUrl = body.match(VIDEO_URL_REGEX)?.groups?.url;
-
-  if (!videoUrl) {
-    throw new Error(`couldn't fetch video URL. response: ${body}`);
-  }
-
-  return videoUrl.replaceAll("\\u0025", "%").replaceAll("\\", "");
+  return {
+    videoUrl: extractRequiredParameter(body, "video_url"),
+    username: extractRequiredParameter(body, "username"),
+    caption: extractParameter(body, "caption"),
+    thumbnailUrl: extractRequiredParameter(body, "thumbnail_src"),
+  };
 };
 
 export default extract;
