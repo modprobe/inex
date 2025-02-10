@@ -56,4 +56,7 @@ import { requireEnv } from "./utils";
     process.env.APP_PORT ? Number.parseInt(process.env.APP_PORT) : 3000,
     (err) => logger.error(err?.message),
   );
+
+  process.once("SIGINT", () => bot.stop("SIGINT"));
+  process.once("SIGTERM", () => bot.stop("SIGTERM"));
 })();
