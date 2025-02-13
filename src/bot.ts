@@ -61,14 +61,19 @@ bot.on(message("text"), async (ctx) => {
       continue;
     }
 
+    const caption = buildCaption(videoMetadata, info);
+
     try {
       await ctx.sendVideo(videoMetadata.videoUrl, {
-        caption: buildCaption(videoMetadata, info),
+        caption: caption,
         disable_notification: true,
+        thumbnail: {
+          url: videoMetadata.thumbnailUrl,
+        },
       });
     } catch {
       await ctx.reply(
-        `💥 Unfortunately I could not send you the video directly. Please try this link:\n${buildUrl(info.shortcode, info.prefix)}`,
+        `💥 Unfortunately I could not send you the video directly. Please try this link: ${buildUrl(info.shortcode, info.prefix)}\n\n${caption}`,
         {
           link_preview_options: {
             is_disabled: false,
@@ -101,7 +106,8 @@ bot.on("inline_query", async (ctx) => {
         video_url: metadata.videoUrl,
         mime_type: "video/mp4",
         thumbnail_url: metadata.thumbnailUrl,
-        title: metadata.caption ?? `Video by @${metadata.username}`,
+        title: `Video by @${metadata.username}`,
+        description: metadata.caption ? `"${metadata.caption}"` : undefined,
         caption: buildCaption(metadata, urlInfo),
       });
     } catch {}
