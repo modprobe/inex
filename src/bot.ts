@@ -61,10 +61,22 @@ bot.on(message("text"), async (ctx) => {
       continue;
     }
 
-    await ctx.sendVideo(videoMetadata.videoUrl, {
-      caption: buildCaption(videoMetadata, info),
-      disable_notification: true,
-    });
+    try {
+      await ctx.sendVideo(videoMetadata.videoUrl, {
+        caption: buildCaption(videoMetadata, info),
+        disable_notification: true,
+      });
+    } catch {
+      await ctx.reply(
+        `💥 Unfortunately I could not send you the video directly. Please try this link:\n${buildUrl(info.shortcode, info.prefix)}`,
+        {
+          link_preview_options: {
+            is_disabled: false,
+            url: buildUrl(info.shortcode, info.prefix),
+          },
+        },
+      );
+    }
   }
 });
 
