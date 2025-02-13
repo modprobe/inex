@@ -10,17 +10,24 @@ const API_HEADERS = {
   "X-Requested-With": "XMLHttpRequest",
 };
 
-type MediaData = {
-  shortcode: string;
-  username: string;
-  caption?: string;
-  video_url: string;
-  thumbnail_src: string;
-};
-
 type DataResponse = {
   data: {
-    xdt_shortcode_media?: MediaData;
+    xdt_shortcode_media?: {
+      shortcode: string;
+      owner: {
+        full_name?: string;
+        username: string;
+      };
+      edge_media_to_caption: {
+        edges: {
+          node: {
+            text?: string;
+          };
+        }[];
+      };
+      video_url: string;
+      thumbnail_src: string;
+    };
   };
 };
 
@@ -55,9 +62,12 @@ const extract: Extractor = async (shortcode) => {
   }
 
   return {
-    username: responseData.data.xdt_shortcode_media.username,
+    source: "graphqlQuery",
+    username: responseData.data.xdt_shortcode_media.owner.username,
     videoUrl: responseData.data.xdt_shortcode_media.video_url,
-    caption: responseData.data.xdt_shortcode_media.username,
+    caption:
+      responseData.data.xdt_shortcode_media.edge_media_to_caption.edges[0]?.node
+        ?.text,
     thumbnailUrl: responseData.data.xdt_shortcode_media.thumbnail_src,
   };
 };

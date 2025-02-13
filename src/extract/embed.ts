@@ -80,6 +80,7 @@ const extract: Extractor = async (shortcode) => {
   }
 
   return {
+    source: "embed",
     videoUrl: extractRequiredParameter(body, "video_url"),
     username: extractRequiredParameter(body, "username"),
     caption: extractParameter(body, "caption"),

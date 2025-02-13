@@ -5,6 +5,8 @@ import graphqlQuery from "./graphqlQuery";
 import { logger } from "../logger";
 
 export type VideoMetadata = {
+  source: "graphqlQuery" | "debugOutput" | "embed";
+
   videoUrl: string;
   username: string;
   thumbnailUrl: string;

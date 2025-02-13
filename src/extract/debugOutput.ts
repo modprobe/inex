@@ -10,17 +10,24 @@ const API_HEADERS = {
   "X-Requested-With": "XMLHttpRequest",
 };
 
-type MediaData = {
-  shortcode: string;
-  video_url: string;
-  username: string;
-  caption?: string;
-  thumbnail_src: string;
-};
-
 type AlternateResponse = {
   graphql: {
-    shortcode_media?: MediaData;
+    shortcode_media?: {
+      shortcode: string;
+      owner: {
+        full_name?: string;
+        username: string;
+      };
+      edge_media_to_caption: {
+        edges: {
+          node: {
+            text?: string;
+          };
+        }[];
+      };
+      video_url: string;
+      thumbnail_src: string;
+    };
   };
 };
 
@@ -45,10 +52,13 @@ const extract: Extractor = async (shortcode) => {
     }
 
     return {
+      source: "debugOutput",
       videoUrl: responseData.graphql.shortcode_media.video_url,
       thumbnailUrl: responseData.graphql.shortcode_media.thumbnail_src,
-      username: responseData.graphql.shortcode_media.username,
-      caption: responseData.graphql.shortcode_media.caption,
+      username: responseData.graphql.shortcode_media.owner.username,
+      caption:
+        responseData.graphql.shortcode_media.edge_media_to_caption.edges[0]
+          ?.node.text,
     };
   } catch {
     throw new Error(`couldn't decode response body. body: ${responseBody}`);
