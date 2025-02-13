@@ -4,12 +4,13 @@ import embed from "./embed";
 import graphqlQuery from "./graphqlQuery";
 import { logger } from "../logger";
 
-type VideoMetadata = {
+export type VideoMetadata = {
   videoUrl: string;
   username: string;
   thumbnailUrl: string;
   caption?: string;
 };
+
 export type Extractor = (shortcode: string) => Promise<VideoMetadata>;
 
 export { default as graphqlQuery } from "./graphqlQuery";

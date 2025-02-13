@@ -1,8 +1,9 @@
 import { Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
-import { requireEnv } from "./utils";
 import type { InlineQueryResultVideo } from "telegraf/types";
+import type { VideoMetadata } from "./extract";
 import { extract } from "./extract";
+import { requireEnv } from "./utils";
 
 const INSTAGRAM_URL_REGEX =
   /(https:\/\/)?(www\.)?instagram\.com\/(?<prefix>p|reel)\/(?<shortcode>[A-Za-z0-9-_]{11})\/?/g;
@@ -10,9 +11,12 @@ const INSTAGRAM_URL_REGEX =
 const APP_BOT_TOKEN = requireEnv("APP_BOT_TOKEN");
 const APP_HOST = requireEnv("APP_HOST");
 
-const extractUrlInfo = (
-  messageText: string,
-): { shortcode: string; prefix: string }[] => {
+type UrlInfo = {
+  shortcode: string;
+  prefix: string;
+};
+
+const extractUrlInfo = (messageText: string): UrlInfo[] => {
   const matches = [...messageText.matchAll(INSTAGRAM_URL_REGEX)];
   if (matches.length === 0) return [];
 
@@ -26,6 +30,9 @@ const extractUrlInfo = (
 
 const buildUrl = (shortcode: string, prefix = "p"): string =>
   `https://${APP_HOST}/${prefix}/${shortcode}`;
+
+const buildCaption = (videoMetadata: VideoMetadata, urlInfo: UrlInfo) =>
+  `📹 Video by @${videoMetadata.username}\n${videoMetadata.caption ? `\n📝 ${videoMetadata.caption}\n\n` : ""}🔗 ${buildUrl(urlInfo.shortcode, urlInfo.prefix)}`;
 
 export const bot = new Telegraf(APP_BOT_TOKEN);
 bot.start((ctx) =>
@@ -55,7 +62,7 @@ bot.on(message("text"), async (ctx) => {
     }
 
     await ctx.sendVideo(videoMetadata.videoUrl, {
-      caption: `📹 Video by @${videoMetadata.username}\n${videoMetadata.caption ? `\n📝 ${videoMetadata.caption}\n\n` : ""}🔗 ${buildUrl(info.shortcode, info.prefix)}`,
+      caption: buildCaption(videoMetadata, info),
     });
   }
 });
@@ -82,9 +89,7 @@ bot.on("inline_query", async (ctx) => {
         mime_type: "video/mp4",
         thumbnail_url: metadata.thumbnailUrl,
         title: metadata.caption ?? `Video by @${metadata.username}`,
-        input_message_content: {
-          message_text: buildUrl(urlInfo.shortcode, urlInfo.prefix),
-        },
+        caption: buildCaption(metadata, urlInfo),
       });
     } catch {}
   }
