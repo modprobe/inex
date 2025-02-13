@@ -63,6 +63,7 @@ bot.on(message("text"), async (ctx) => {
 
     await ctx.sendVideo(videoMetadata.videoUrl, {
       caption: buildCaption(videoMetadata, info),
+      disable_notification: true,
     });
   }
 });
