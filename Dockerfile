@@ -1,4 +1,4 @@
-FROM node:23-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 COPY . /app
@@ -9,7 +9,7 @@ RUN corepack enable \
 
 ###
 
-FROM node:23-alpine AS deps
+FROM node:24-alpine AS deps
 
 WORKDIR /app
 COPY --from=builder /app/dist /app/package.json /app/pnpm-lock.yaml /app/
@@ -19,7 +19,7 @@ RUN corepack enable \
 
 ###
 
-FROM node:23-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 COPY --from=deps /app /app/
